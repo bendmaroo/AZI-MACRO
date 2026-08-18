@@ -1,0 +1,31 @@
+name: Build Windows Exe
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}   # lets you click "Run workflow" manually too
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: 'ea2a964f9303270322cf3f2d51c265ba0c84422'
+
+      - name: Configure CMake
+        run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build Release
+        run: cmake --build build --config Release
+
+      - name: Upload compiled exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: BladeBallClicker-exe
+          path: build/Release/BladeBallClicker.exe
